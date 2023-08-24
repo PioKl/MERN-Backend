@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const placesRoutes = require("./routes/places-routes");
+const HttpError = require("./models/http-error");
 
 const app = express();
 
@@ -11,6 +12,12 @@ app.use(bodyParser.json());
 //middleware
 //ścieżka nie musi być "exact", ale musi się zaczynać specyficzną ścieżką
 app.use("/api/places", placesRoutes);
+
+//middleware
+app.use((req, res, next) => {
+  const error = new HttpError("Could not find this route.", 404);
+  throw error;
+});
 
 //middleware w celu obsługi błędów
 app.use((error, req, res, next) => {
