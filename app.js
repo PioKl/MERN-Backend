@@ -6,6 +6,8 @@ const placesRoutes = require("./routes/places-routes");
 const app = express();
 
 //middleware
-app.use(placesRoutes);
+
+//ścieżka nie musi być "exact", ale musi się zaczynać specyficzną ścieżką
+app.use("/api/places", placesRoutes);
 
 app.listen(5000);
