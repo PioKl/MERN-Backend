@@ -1,9 +1,12 @@
 const express = require("express");
-const bodyPares = require("body-parser");
+const bodyParser = require("body-parser");
 
 const placesRoutes = require("./routes/places-routes");
 
 const app = express();
+
+//middleware
+app.use(bodyParser.json());
 
 //middleware
 //ścieżka nie musi być "exact", ale musi się zaczynać specyficzną ścieżką
