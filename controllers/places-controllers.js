@@ -1,5 +1,7 @@
 const uuid = require("uuid").v4;
 
+const { validationResult } = require("express-validator");
+
 const HttpError = require("../models/http-error");
 
 let DUMMY_PLACES = [
@@ -53,6 +55,12 @@ const getPlacesByUserId = (req, res, next) => {
 };
 
 const createPlace = (req, res, next) => {
+  const errors = validationResult(req); //sprawdzi czy są jakieś błędy (żeby nie dodać pustego miejsca)
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    throw new HttpError("Invaild inputs passed, please chceck you data.", 422);
+  }
+
   const { title, description, coordinates, address, creator } = req.body;
   const createdPlace = {
     //title: title
