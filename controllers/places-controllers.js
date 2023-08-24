@@ -4,6 +4,8 @@ const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
 
+const getCoordsForAddress = require("../util/location");
+
 let DUMMY_PLACES = [
   {
     id: "p1",
@@ -54,13 +56,24 @@ const getPlacesByUserId = (req, res, next) => {
   res.json({ places });
 };
 
-const createPlace = (req, res, next) => {
+const createPlace = async (req, res, next) => {
   const errors = validationResult(req); //sprawdzi czy są jakieś błędy (żeby nie dodać pustego miejsca)
   if (!errors.isEmpty()) {
-    throw new HttpError("Invaild inputs passed, please chceck you data.", 422);
+    //throw nie dziala z async
+    return next(
+      new HttpError("Invaild inputs passed, please chceck you data.", 422)
+    );
   }
 
-  const { title, description, coordinates, address, creator } = req.body;
+  const { title, description, address, creator } = req.body;
+
+  let coordinates;
+  try {
+    coordinates = await getCoordsForAddress(address);
+  } catch (error) {
+    return next(error);
+  }
+
   const createdPlace = {
     //title: title
     id: uuid(),
