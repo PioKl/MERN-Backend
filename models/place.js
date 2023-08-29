@@ -15,4 +15,5 @@ const placeSchema = new Schema({
 });
 
 //create model
+//"Place" to nazwa kolekcji
 module.exports = mongoose.model("Place", placeSchema);
