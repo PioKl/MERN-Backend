@@ -120,7 +120,7 @@ const createPlace = async (req, res, next) => {
   res.status(201).json({ place: createdPlace }); //201 stworzono coś nowego
 };
 
-const updatePlace = (req, res, next) => {
+const updatePlace = async (req, res, next) => {
   const errors = validationResult(req); //sprawdzi czy są jakieś błędy (żeby nie dodać pustego miejsca)
   if (!errors.isEmpty()) {
     throw new HttpError("Invaild inputs passed, please chceck you data.", 422);
@@ -129,15 +129,31 @@ const updatePlace = (req, res, next) => {
   const { title, description } = req.body;
   const placeId = req.params.pid;
 
-  const updatedPlace = { ...DUMMY_PLACES.find((p) => p.id === placeId) };
-  const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update place.",
+      500
+    );
+    return next(error);
+  }
 
-  updatedPlace.title = title;
-  updatedPlace.description = description;
+  place.title = title;
+  place.description = description;
 
-  DUMMY_PLACES[placeIndex] = updatedPlace;
+  try {
+    await place.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update place.",
+      500
+    );
+    return next(error);
+  }
 
-  res.status(200).json({ place: updatedPlace }); // nie 201, bo nie jest to nowa rzecz, tylko update
+  res.status(200).json({ place: place.toObject({ getters: true }) }); // nie 201, bo nie jest to nowa rzecz, tylko update
 };
 const deletePlace = (req, res, next) => {
   const placeId = req.params.pid;
