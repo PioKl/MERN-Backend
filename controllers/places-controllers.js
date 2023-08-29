@@ -123,7 +123,9 @@ const createPlace = async (req, res, next) => {
 const updatePlace = async (req, res, next) => {
   const errors = validationResult(req); //sprawdzi czy są jakieś błędy (żeby nie dodać pustego miejsca)
   if (!errors.isEmpty()) {
-    throw new HttpError("Invaild inputs passed, please chceck you data.", 422);
+    return next(
+      new HttpError("Invaild inputs passed, please chceck you data.", 422)
+    );
   }
 
   const { title, description } = req.body;
