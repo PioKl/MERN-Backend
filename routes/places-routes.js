@@ -4,6 +4,8 @@ const { check } = require("express-validator");
 
 const placesControllers = require("../controllers/places-controllers");
 
+const fileUpload = require("../middleware/file-upload");
+
 const router = express.Router();
 
 //kolejność tych 'routów' ma znaczenie
@@ -15,6 +17,7 @@ router.get("/user/:uid", placesControllers.getPlacesByUserId);
 //check jest w celu sprawdzenia, czy są jakieś puste miejsca gdy tworzy się miejsce
 router.post(
   "/",
+  fileUpload.single("image"),
   [
     check("title").not().isEmpty(),
     check("description").isLength({ min: 5 }),
