@@ -24,7 +24,7 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Origin",
-    "https://nutty-jaguar.cyclic.app/"
+    "https://nutty-jaguar.cyclic.app"
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
