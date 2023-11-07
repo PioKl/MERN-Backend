@@ -44,15 +44,18 @@ app.use((req, res, next) => {
   throw error;
 });
 
+//middleware w celu obsługi błędów
 app.use((error, req, res, next) => {
-  let status = error.code || 500;
-  let message = error.message || "An unknown error occurred!";
-
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
   if (res.headerSent) {
     return next(error);
   }
-
-  res.status(status).json({ message });
+  res.status(error.code || 500);
+  res.json({ message: error.message || "An unknown error occurred!" });
 });
 
 mongoose
