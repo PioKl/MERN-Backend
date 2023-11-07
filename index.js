@@ -11,7 +11,11 @@ const usersRoutes = require("./routes/users-routes");
 
 const HttpError = require("./models/http-error");
 
+const cors = require("cors");
+
 const app = express();
+
+app.use(cors());
 
 //middleware
 app.use(bodyParser.json());
