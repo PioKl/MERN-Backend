@@ -23,7 +23,7 @@ app.use("/uploads/images", express.static(path.join("uploads", "images")));
 app.use((req, res, next) => {
   res.setHeader(
     "Access-Control-Allow-Origin",
-    "https://nutty-jaguar.cyclic.app"
+    "https://nutty-jaguar.cyclic.app/api/users"
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
