@@ -30,7 +30,7 @@ app.use((req, res, next) => {
 
   res.setHeader(
     "Access-Control-Allow-Origin",
-    "https://mern-frontend-a2805.web.app"
+    "https://nutty-jaguar.cyclic.app"
   );
   res.setHeader("Access-Control-Allow-Methods", "POST");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
