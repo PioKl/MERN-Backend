@@ -93,6 +93,18 @@ const signup = async (req, res, next) => {
     .json({ userId: createdUser.id, email: createdUser.email, token: token });
 };
 
+// Funkcja middleware używana do obsługi plików
+const multer = require("multer");
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/images"); // Katalog, w którym będą przechowywane pliki
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString() + "-" + file.originalname); // Nadanie plikowi unikalnej nazwy
+  },
+});
+const fileUpload = multer({ storage: storage }).single("image");
+
 const login = async (req, res, next) => {
   const { email, password } = req.body;
 
