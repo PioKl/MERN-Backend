@@ -5,27 +5,28 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
+const cors = require("cors");
+
+const app = express();
+
 const placesRoutes = require("./routes/places-routes");
 
 const usersRoutes = require("./routes/users-routes");
 
 const HttpError = require("./models/http-error");
 
-const cors = require("cors");
-
-const app = express();
-
 //middleware
 app.use(bodyParser.json());
 
-//app.use("/uploads/images", express.static(path.join("uploads", "images")));
 app.use(
   "/uploads/images",
   express.static(path.join(__dirname, "uploads", "images"))
 );
 
+/* app.use("/uploads/images", express.static(path.join("uploads", "images")));
+
 //pozbycie się błędu corss
-/* app.use((req, res, next) => {
+app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
@@ -34,8 +35,8 @@ app.use(
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
 
   next();
-}); */
-
+});
+ */
 app.use(cors());
 
 //middleware
