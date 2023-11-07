@@ -28,14 +28,6 @@ app.use((req, res, next) => {
   );
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
 
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://nutty-jaguar.cyclic.app"
-  );
-  res.setHeader("Access-Control-Allow-Methods", "POST");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  res.setHeader("Access-Control-Allow-Credentials", true);
-
   next();
 });
 
