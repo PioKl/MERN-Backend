@@ -15,19 +15,14 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
-
 //middleware
 app.use(bodyParser.json());
 
 app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
 //pozbycie się błędu corss
-app.use((req, res, next) => {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://mern-frontend-a2805.web.app"
-  );
+/* app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
@@ -35,7 +30,9 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
 
   next();
-});
+}); */
+
+app.use(cors());
 
 //middleware
 //ścieżka nie musi być "exact", ale musi się zaczynać specyficzną ścieżką
