@@ -26,7 +26,7 @@ app.use("/uploads/images", express.static(path.join("uploads", "images")));
 app.use((req, res, next) => {
   res.setHeader(
     "Access-Control-Allow-Origin",
-    "https://mern-frontend-a2805.web.app/"
+    "https://mern-frontend-a2805.web.app"
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
