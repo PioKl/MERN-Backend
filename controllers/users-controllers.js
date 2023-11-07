@@ -168,6 +168,6 @@ const login = async (req, res, next) => {
 
 exports.getUsers = getUsers;
 
-exports.signup = signup;
+exports.signup = [fileUpload, signup]; // Dodanie middleware'u obsługującego pliki przed funkcją obsługującą signup
 
 exports.login = login;
