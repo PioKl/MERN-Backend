@@ -4,7 +4,7 @@ const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const cors = require("cors");
+//const cors = require("cors");
 
 const placesRoutes = require("./routes/places-routes");
 
@@ -21,10 +21,7 @@ app.use("/uploads/images", express.static(path.join("uploads", "images")));
 
 //pozbycie się błędu corss
 app.use((req, res, next) => {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://nutty-jaguar.cyclic.app/api/users"
-  );
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
