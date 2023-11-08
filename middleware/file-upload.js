@@ -1,7 +1,6 @@
 const multer = require("multer");
 const AWS = require("aws-sdk");
-const uuid = require("uuid").v4;
-const fs = require("fs");
+const multerS3 = require("multer-s3");
 
 const s3 = new AWS.S3();
 
@@ -13,75 +12,21 @@ const MIME_TYPE_MAP = {
 
 const fileUpload = multer({
   limits: 500000,
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, "uploads/images"); // Lokalny katalog do przechowywania plików
+  storage: multerS3({
+    s3: s3,
+    bucket: process.env.CYCLIC_BUCKET_NAME,
+    acl: "public-read",
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
     },
-    filename: (req, file, cb) => {
-      const ext = MIME_TYPE_MAP[file.mimetype]; // Rozszerzenie pliku
-      cb(null, uuid() + "." + ext);
+    key: function (req, file, cb) {
+      cb(null, Date.now().toString());
     },
   }),
-
-  // Sprawdzenie poprawności typu pliku
   fileFilter: (req, file, cb) => {
-    const isValid = !!MIME_TYPE_MAP[file.mimetype]; //!! jeśli undefined/null to konwersja do false, bądź true, jeśli było false(0,null, undefined) to będzie false, w przeciwnym wypadku true
-    const error = isValid ? null : new Error("Invalid mime type!");
+    const isValid = !!MIME_TYPE_MAP[file.mimetype];
+    let error = isValid ? null : new Error("Invalid mime type !");
     cb(error, isValid);
   },
 });
-
-const uploadToS3 = async (req, res, next) => {
-  fileUpload.single("image")(req, res, async (err) => {
-    if (err) {
-      if (err.code === "LIMIT_FILE_SIZE") {
-        return res.status(422).json({ message: "File size too large." });
-      } else if (err.code === "LIMIT_UNEXPECTED_FILE") {
-        return res.status(422).json({ message: "Unexpected number of files." });
-      } else if (err.code === "LIMIT_FILE_COUNT") {
-        return res.status(422).json({ message: "Exceeded file count limit." });
-      } else {
-        return res
-          .status(422)
-          .json({ message: "Unknown error during file upload." });
-      }
-      //return res.status(422).json({ message: "File upload failed." });
-    }
-
-    try {
-      if (!req.file) {
-        const error = new Error("No file provided");
-        error.statusCode = 422;
-        throw error;
-      }
-
-      // Pobierz lokalną ścieżkę pliku
-      const localFilePath = req.file.path;
-
-      const ext = MIME_TYPE_MAP[req.file.mimetype];
-      const Key = uuid() + "." + ext;
-
-      await s3
-        .upload({
-          Body: fs.createReadStream(localFilePath),
-          Bucket: process.env.CYCLIC_BUCKET_NAME,
-          Key: Key,
-        })
-        .promise();
-
-      // Usuń plik lokalny po przesłaniu do AWS S3
-      fs.unlink(localFilePath, (err) => {
-        if (err) {
-          console.error("Failed to delete local file:", err);
-        }
-      });
-
-      next();
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Failed to upload file to S3" });
-    }
-  });
-};
-
-module.exports = uploadToS3;
+module.exports = fileUpload;
