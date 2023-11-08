@@ -34,8 +34,18 @@ const fileUpload = multer({
 const uploadToS3 = async (req, res, next) => {
   fileUpload.single("image")(req, res, async (err) => {
     if (err) {
-      console.log(err);
-      return res.status(422).json({ message: "File upload failed." });
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(422).json({ message: "File size too large." });
+      } else if (err.code === "LIMIT_UNEXPECTED_FILE") {
+        return res.status(422).json({ message: "Unexpected number of files." });
+      } else if (err.code === "LIMIT_FILE_COUNT") {
+        return res.status(422).json({ message: "Exceeded file count limit." });
+      } else {
+        return res
+          .status(422)
+          .json({ message: "Unknown error during file upload." });
+      }
+      //return res.status(422).json({ message: "File upload failed." });
     }
 
     try {
