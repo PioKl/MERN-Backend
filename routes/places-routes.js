@@ -4,7 +4,8 @@ const { check } = require("express-validator");
 
 const placesControllers = require("../controllers/places-controllers");
 
-const fileUpload = require("../middleware/file-upload");
+//const fileUpload = require("../middleware/file-upload");
+const uploadToS3 = require("../middleware/file-upload");
 
 const checkAuth = require("../middleware/check-auth");
 
@@ -21,7 +22,7 @@ router.use(checkAuth);
 //check jest w celu sprawdzenia, czy są jakieś puste miejsca gdy tworzy się miejsce
 router.post(
   "/",
-  fileUpload.single("image"),
+  uploadToS3,
   [
     check("title").not().isEmpty(),
     check("description").isLength({ min: 5 }),
