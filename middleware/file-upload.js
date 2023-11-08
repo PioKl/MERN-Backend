@@ -11,29 +11,30 @@ const MIME_TYPE_MAP = {
   "image/jpg": "jpg",
 };
 
-const uploadToS3 = async (req, res, next) => {
-  const fileUpload = multer({
-    limits: 500000,
-    storage: multer.diskStorage({
-      destination: (req, file, cb) => {
-        cb(null, "uploads/images"); // Lokalny katalog do przechowywania plików
-      },
-      filename: (req, file, cb) => {
-        const ext = MIME_TYPE_MAP[file.mimetype]; // Rozszerzenie pliku
-        cb(null, uuid() + "." + ext);
-      },
-    }),
-
-    // Sprawdzenie poprawności typu pliku
-    fileFilter: (req, file, cb) => {
-      const isValid = !!MIME_TYPE_MAP[file.mimetype]; //!! jeśli undefined/null to konwersja do false, bądź true, jeśli było false(0,null, undefined) to będzie false, w przeciwnym wypadku true
-      const error = isValid ? null : new Error("Invalid mime type!");
-      cb(error, isValid);
+const fileUpload = multer({
+  limits: 500000,
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "uploads/images"); // Lokalny katalog do przechowywania plików
     },
-  });
+    filename: (req, file, cb) => {
+      const ext = MIME_TYPE_MAP[file.mimetype]; // Rozszerzenie pliku
+      cb(null, uuid() + "." + ext);
+    },
+  }),
 
+  // Sprawdzenie poprawności typu pliku
+  fileFilter: (req, file, cb) => {
+    const isValid = !!MIME_TYPE_MAP[file.mimetype]; //!! jeśli undefined/null to konwersja do false, bądź true, jeśli było false(0,null, undefined) to będzie false, w przeciwnym wypadku true
+    const error = isValid ? null : new Error("Invalid mime type!");
+    cb(error, isValid);
+  },
+});
+
+const uploadToS3 = async (req, res, next) => {
   fileUpload.single("image")(req, res, async (err) => {
     if (err) {
+      console.log(err);
       return res.status(422).json({ message: "File upload failed." });
     }
 
