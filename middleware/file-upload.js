@@ -34,6 +34,7 @@ const fileUpload = multer({
 const uploadToS3 = async (req, res, next) => {
   fileUpload.single("image")(req, res, async (err) => {
     if (err) {
+      console.log(err);
       return res.status(422).json({ message: "File upload failed." });
     }
 
