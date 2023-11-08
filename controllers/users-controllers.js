@@ -6,6 +6,8 @@ const HttpError = require("../models/http-error");
 
 const User = require("../models/user");
 
+const uploadToS3 = require("../middleware/file-upload");
+
 const getUsers = async (req, res, next) => {
   let users;
   try {
@@ -25,72 +27,81 @@ const signup = async (req, res, next) => {
   const errors = validationResult(req); //sprawdzi czy są jakieś błędy (żeby nie dodać pustego miejsca)
   if (!errors.isEmpty()) {
     return next(
-      new HttpError("Invaild inputs passed, please chceck you data.", 422)
+      new HttpError("Invalid inputs passed, please check your data.", 422)
     );
   }
 
   const { name, email, password } = req.body;
 
-  let existingUser;
-  try {
-    existingUser = await User.findOne({ email: email });
-  } catch (err) {
-    const error = new HttpError(
-      "Signing up failed, please try again later.",
-      500
-    );
-    return next(error);
-  }
+  // Przesłanie pliku do AWS S3 i zapis w bazie danych
+  uploadToS3.single("image")(req, res, async (err) => {
+    if (err) {
+      return next(err);
+    }
 
-  if (existingUser) {
-    const error = new HttpError(
-      "User exists already, please login instead.",
-      422
-    );
-    return next(error);
-  }
+    const { path } = req.file; // Ścieżka pliku w AWS S3
 
-  let hashedPassword;
-  try {
-    hashedPassword = await bcrypt.hash(password, 12);
-  } catch (err) {
-    const error = new HttpError(
-      "Could not create user, please try again.",
-      500
-    );
-    return next(error);
-  }
+    let existingUser;
+    try {
+      existingUser = await User.findOne({ email: email });
+    } catch (err) {
+      const error = new HttpError(
+        "Signing up failed, please try again later.",
+        500
+      );
+      return next(error);
+    }
 
-  const createdUser = new User({
-    name,
-    email,
-    image: req.file.path,
-    password: hashedPassword,
-    places: [],
+    if (existingUser) {
+      const error = new HttpError(
+        "User exists already, please login instead.",
+        422
+      );
+      return next(error);
+    }
+
+    let hashedPassword;
+    try {
+      hashedPassword = await bcrypt.hash(password, 12);
+    } catch (err) {
+      const error = new HttpError(
+        "Could not create user, please try again.",
+        500
+      );
+      return next(error);
+    }
+
+    const createdUser = new User({
+      name,
+      email,
+      image: path, // Ścieżka pliku z AWS S3
+      password: hashedPassword,
+      places: [],
+    });
+
+    try {
+      await createdUser.save();
+    } catch (err) {
+      const error = new HttpError("Signing up failed, please try again.", 500);
+      return next(error);
+    }
+
+    let token;
+    try {
+      token = jwt.sign(
+        { userId: createdUser.id, email: createdUser.email },
+        process.env.JWT_KEY,
+        { expiresIn: "1h" }
+      );
+    } catch (err) {
+      const error = new HttpError("Signing up failed, please try again.", 500);
+      return next(error);
+    }
+
+    res
+      .status(201)
+      .json({ userId: createdUser.id, email: createdUser.email, token: token });
   });
-
-  try {
-    await createdUser.save();
-  } catch (err) {
-    const error = new HttpError("Signing up failed, please try again.", 500);
-    return next(error);
-  }
-
-  let token;
-  try {
-    token = jwt.sign(
-      { userId: createdUser.id, email: createdUser.email },
-      process.env.JWT_KEY,
-      { expiresIn: "1h" }
-    );
-  } catch (err) {
-    const error = new HttpError("Signing up failed, please try again.", 500);
-    return next(error);
-  }
-
-  res
-    .status(201)
-    .json({ userId: createdUser.id, email: createdUser.email, token: token });
 };
 
 const login = async (req, res, next) => {
