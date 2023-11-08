@@ -36,6 +36,7 @@ const signup = async (req, res, next) => {
   // Przesłanie pliku do AWS S3 i zapis w bazie danych
   uploadToS3.single("image")(req, res, async (err) => {
     if (err) {
+      console.error("Error during S3 upload:", err);
       return next(err);
     }
 
